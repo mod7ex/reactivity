@@ -1,41 +1,16 @@
-// **************************************************************** Reactivity 0
+// **************************************************************** Reactivity 2
+type Tg = () => void;
 
-/*
-type Target = null | (() => void);
+let target: Tg | undefined;
 
-let price = 5;
-let quantity = 2;
-let total = 0;
-
-let target: Target = null;
-
-let storage: Target[] = [];
-
-target = () => {
-	total = price * quantity;
+let watcher = (myFunc: Tg) => {
+	target = myFunc;
+	target();
+	target = undefined;
 };
-
-let record = () => {
-	storage.push(target);
-};
-
-let replay = () => {
-	storage.forEach((run) => run && run());
-};
-
-record(); // save target
-
-target();
-*/
-
-// **************************************************************** Reactivity 1
-
-type Target = () => void;
-
-let target: Target | undefined;
 
 class Dep {
-	constructor(private subscribers: Target[] = []) {}
+	constructor(private subscribers: Tg[] = []) {}
 
 	depend() {
 		if (!target || this.subscribers.includes(target)) return;
@@ -47,24 +22,31 @@ class Dep {
 	}
 }
 
-let dep = new Dep();
+let data = { price: 5, quantity: 2 };
 
-let price = 5;
-let quantity = 2;
+Object.keys(data).forEach((key) => {
+	// @ts-ignore
+	let internalValue = data[key];
+
+	let dep = new Dep();
+
+	Object.defineProperty(data, key, {
+		get() {
+			console.log(`Getting ${key}: ${internalValue}`);
+			dep.depend(); // record target
+			return internalValue;
+		},
+
+		set(v) {
+			console.log(`Setting ${key}: ${v}`);
+			internalValue = v;
+			dep.notify(); // notify (run) subscribers
+		},
+	});
+});
+
 let total = 0;
 
-// ----------------> we will encapsulate the three new blocks in one function called watcher
-// target = () => { total = price * quantity; };
-// dep.depend();
-// target();
-
-let watcher = (myFunc: Target) => {
-	target = myFunc;
-	dep.depend();
-	target();
-	target = undefined;
-};
-
 watcher(() => {
-	total = price * quantity;
+	total = data.price * data.quantity;
 });
