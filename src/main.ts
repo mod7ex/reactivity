@@ -1,17 +1,23 @@
 // **************************************************************** Reactivity 2
 
-let watcher = (myFunc: Tg) => {
-	target = myFunc;
-	target();
-	target = undefined;
+let activeUpdate: Tg | undefined;
+
+let autorun = (update: Tg) => {
+	function wrappedUpdate() {
+		activeUpdate = wrappedUpdate;
+		update();
+		activeUpdate = undefined;
+	}
+
+	wrappedUpdate();
 };
 
 class Dep {
-	constructor(private subscribers: Tg[] = []) {}
+	constructor(private subscribers: Set<Tg> = new Set()) {}
 
 	depend() {
-		if (!target || this.subscribers.includes(target)) return;
-		this.subscribers.push(target);
+		if (!activeUpdate || this.subscribers.has(activeUpdate)) return;
+		this.subscribers.add(activeUpdate);
 	}
 
 	notify() {
@@ -20,6 +26,7 @@ class Dep {
 }
 
 let data = { price: 5, quantity: 2 };
+let total = 0;
 
 Object.keys(data).forEach((key) => {
 	// @ts-ignore
@@ -42,8 +49,6 @@ Object.keys(data).forEach((key) => {
 	});
 });
 
-let total = 0;
-
-watcher(() => {
+autorun(() => {
 	total = data.price * data.quantity;
 });
