@@ -1,7 +1,4 @@
 // **************************************************************** Reactivity 2
-type Tg = () => void;
-
-let target: Tg | undefined;
 
 let watcher = (myFunc: Tg) => {
 	target = myFunc;
