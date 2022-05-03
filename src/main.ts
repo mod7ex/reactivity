@@ -1,5 +1,8 @@
 // **************************************************************** Reactivity 2
 
+/*
+type Tg = () => void;
+
 let activeUpdate: Tg | undefined;
 
 let autorun = (update: Tg) => {
@@ -52,3 +55,5 @@ Object.keys(data).forEach((key) => {
 autorun(() => {
 	total = data.price * data.quantity;
 });
+
+*/

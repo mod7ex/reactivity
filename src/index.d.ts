@@ -1,1 +1,1 @@
-type Tg = () => void;
+
